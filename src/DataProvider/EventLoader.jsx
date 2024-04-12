@@ -17,7 +17,7 @@ export const EventLoader = ({ children, ...props }) => {
     query,
     variables: { eid: eventId },
     onSuccess(data) {
-      event = data.eventsV2.events.find((event) => event.eid === eventId);
+      data.eventsV2.events.find((event) => event.eid === eventId);
     },
   });
 

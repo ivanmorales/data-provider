@@ -10,6 +10,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import { compress, decompress } from "lz-string";
 import { EventLoader } from "./DataProvider/EventLoader";
 import { LeagueEventLoader } from "./DataProvider/LeagueEventLoader";
+import { PicksLoader } from "./DataProvider/PicksLoader";
 
 const queryClient = new QueryClient({
   // defaultOptions: { queries: { staleTime: 1000 * 60 } },
@@ -81,7 +82,12 @@ function App() {
           </EventLoader>
         ))} */}
       </div>
-      <LeagueEventLoader leagueId={5}>
+      {/* PICKS LOADER */}
+      <PicksLoader leagueId={5} mtid={[401, 83, 402]} date={1712905200000}>
+        {({ events }) => events.map(({eid}) => <div>{eid}</div>)}
+      </PicksLoader>
+      {/* LEAGUE EVENT LOADER!!! */}
+      {/* <LeagueEventLoader leagueId={5}>
         {({ events }) =>
           events.map(({ eid }) => {
             return (
@@ -92,7 +98,7 @@ function App() {
             );
           })
         }
-      </LeagueEventLoader>
+      </LeagueEventLoader> */}
       {/* <LeagueEventsLoader leagueId={5}>
         {({ league }) => (
           <>
