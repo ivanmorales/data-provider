@@ -6,10 +6,11 @@ const oddsClient = new GraphQLClient(import.meta.env.VITE_ODDSTRADER_ENDPOINT, {
 });
 
 export const buildKey = (keys) => ["oddsservice", ...keys];
+export const buildCacheKey = (key) => (keys) => [key, ...keys];
 
 export const useOddsService = (keys, { query, variables = {}, onSuccess }) => {
   const queryKey = buildKey(keys);
-
+  console.log("queryKey", queryKey);
   const queryClient = useQueryClient();
 
   const response = useQuery({

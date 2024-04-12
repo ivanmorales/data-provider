@@ -11,11 +11,13 @@ import { compress, decompress } from "lz-string";
 import { EventLoader } from "./DataProvider/EventLoader";
 import { LeagueEventLoader } from "./DataProvider/LeagueEventLoader";
 import { EventPredictionLoader } from "./DataProvider/EventPredictionLoader";
-import { PicksLoader } from "./DataProvider/PicksLoader";
+// import { PicksLoader } from "./DataProvider/PicksLoader";
+import { EventCard } from "./component/EventCard";
+import { Loading } from "./component/Loading";
 
 const queryClient = new QueryClient({
   // defaultOptions: { queries: { staleTime: 1000 * 60 } },
-  defaultOptions: { queries: { staleTime: 1000 } },
+  defaultOptions: { queries: { staleTime: 1000 * 10 } },
 });
 
 persistQueryClient({
@@ -28,112 +30,53 @@ persistQueryClient({
   maxAge: Infinity,
 });
 
-const newMarkets = [1608, 1609, 1613, 1614, 1615];
+const picksMarkets = [401, 402];
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-function App() {
-  const [markets, setMarkets] = useState([1607]);
+const LEAGUE = 5;
+const DATE = 1712041200000;
+const EVENT_STATUSES = [
+  "scheduled",
+  "in-progress",
+  "complete",
+  "suspended",
+  "delayed",
+  "postponed",
+  "retired",
+  "canceled",
+  "unknown",
+];
+const MARKETS = [1607, 1608, 1609];
 
+function App() {
   return (
     <DataProvider client={queryClient}>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button
-          onClick={() =>
-            setMarkets((markets) => [...markets, newMarkets.pop()])
-          }
-        >
-          Fetch new market
-        </button>
-        {/* {markets.map((marketId) => (
-          <EventLoader eventId={4710564} marketId={marketId} key={marketId}>
-            {({ event }) => (
-              <>
-                <p style={{ textAlign: "left" }}>
-                  {event.eid} - {marketId}
-                </p>
-                <EventLoader
-                  eventId={4710565}
-                  marketId={marketId}
-                  key={marketId}
+      <LeagueEventLoader
+        leagueId={LEAGUE}
+        date={DATE}
+        eventStatuses={EVENT_STATUSES}
+      >
+        {({ events }) =>
+          events.map((event) => (
+            <EventCard event={event} key={event.eid}>
+              {MARKETS.map((market) => (
+                <EventPredictionLoader
+                  eventId={event.eid}
+                  marketId={market}
+                  key={market}
+                  fallback={<Loading />}
                 >
-                  {({ event }) => (
-                    <>
-                      <h4>{event.eid}</h4>
-                      {event.participatType === "player" && (
-                        <PlayerParticpantLoader playerId={event.participant.id}>
-                          {({ player }) => <h5>{player.name}</h5>}
-                        </PlayerParticpantLoader>
-                      )}
-                    </>
+                  {({ event: { prediction } }) => (
+                    <pre>{JSON.stringify(prediction, null, 2)}</pre>
                   )}
-                </EventLoader>
-              </>
-            )}
-          </EventLoader>
-        ))} */}
-      </div>
-      {/* PICKS LOADER */}
-      <PicksLoader leagueId={5} mtid={[401, 83, 402]} date={1712041200000}>
-        {({ events }) =>
-          events.map(({ eid }) => {
-            return (
-              <EventPredictionLoader eventId={eid} marketId={1607} key={eid}>
-                {({ event: { eid, marketPrediction } }) => (
-                  <div>
-                    EVENT:{" "}
-                    <pre>{JSON.stringify({ eid, marketPrediction }, 0, 2)}</pre>
-                  </div>
-                )}
-              </EventPredictionLoader>
-            );
-          })
+                </EventPredictionLoader>
+              ))}
+            </EventCard>
+          ))
         }
-      </PicksLoader>
-      {/* LEAGUE EVENT LOADER!!! */}
-      {/* <LeagueEventLoader leagueId={5}>
-        {({ events }) =>
-          events.map(({ eid }) => {
-            return (
-              // <span key=>{eid}</span>
-              <EventLoader key={eid} eventId={eid}>
-                {({ event }) => <h4>{event.eid}</h4>}
-              </EventLoader>
-            );
-          })
-        }
-      </LeagueEventLoader> */}
-      {/* <LeagueEventsLoader leagueId={5}>
-        {({ league }) => (
-          <>
-            {league.events?.map((event) => (
-              <EventLoader
-                eventId={event.eid}
-                market={selectedMarketId}
-                key={event.eid}
-              >
-                {({ event }) => <Prediction data={event.predictionData} />}
-              </EventLoader>
-            ))}
-          </>
-        )}
-      </LeagueEventsLoader> */}
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-      {/* // <EventLoader eventId={4710565}>
-      //   {({ event }) => <h4>{event.eid}</h4>}
-      // </EventLoader> */}
+      </LeagueEventLoader>
     </DataProvider>
   );
 }

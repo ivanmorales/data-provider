@@ -1,23 +1,28 @@
 import byLeague from "../queries/byLeague";
 
-import { useOddsService, buildKey } from "./useOddsService";
+import { buildKey, useOddsService } from "./useOddsService";
 import { useFirebaseService } from "./useFirebaseService";
+import { Loading } from "../component/Loading";
 
-export const LeagueEventLoader = ({ children, ...props }) => {
+export const LeagueEventLoader = ({
+  children,
+  fallback = <Loading />,
+  ...props
+}) => {
   if (typeof children !== "function") {
     console.error(`{children} must be passed as a function`);
     return;
   }
-  const { leagueId } = props;
+  const { leagueId, date, eventStatuses } = props;
 
-  const keys = ["league", leagueId];
+  const keys = ["league", leagueId, date];
 
   const query = byLeague({
     lid: leagueId,
     fastForward: true,
     paid: "[101,106,113,102,98,109,115,122,99]",
-    eventStatus: JSON.stringify(["scheduled", "delayed"]),
-    date: 1712905200000,
+    eventStatuses: JSON.stringify(eventStatuses),
+    date: date,
     hoursRange: 24,
     fastForwardOffset: -7,
     mtid: JSON.stringify([
@@ -42,7 +47,7 @@ export const LeagueEventLoader = ({ children, ...props }) => {
   });
 
   if (oddsResult.isLoading) {
-    return <span>Loading ...</span>;
+    return fallback;
   }
 
   const events = oddsResult.data?.eventsByDateNew.events;

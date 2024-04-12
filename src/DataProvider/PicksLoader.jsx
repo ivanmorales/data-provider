@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import byLeague from "../queries/byLeague";
 
-import { useOddsService, buildKey } from "./useOddsService";
+import { useOddsService, buildCacheKey } from "./useOddsService";
 import { useFirebaseService } from "./useFirebaseService";
 
 // NEEDS TO BUILD THE BODIES AGAIN
@@ -20,20 +20,30 @@ export const PicksLoader = ({ children, ...props }) => {
     lid: leagueId,
     fastForward: true,
     paid: "[101,106,113,102,98,109,115,122,99]",
-    eventStatus: JSON.stringify(["scheduled", "in-progress", "complete", "suspended", "delayed", "postponed", "retired", "canceled", "unknown"]),
+    eventStatus: JSON.stringify([
+      "scheduled",
+      "in-progress",
+      "complete",
+      "suspended",
+      "delayed",
+      "postponed",
+      "retired",
+      "canceled",
+      "unknown",
+    ]),
     date,
     hoursRange: 24,
     fastForwardOffset: -7,
-    mtid: JSON.stringify(mtid) // [1607, 1608, 1609],
+    mtid: JSON.stringify(mtid), // [1607, 1608, 1609],
   });
   const oddsResult = useOddsService(keys, {
     query,
     variables: {},
     async onSuccess(data, cacheData) {
       if (!data.eventsByDateNew) return;
-      
+
       data.eventsByDateNew.events.forEach((event) => {
-        const queryKey = buildKey(["eventPrediction", event.eid]);
+        const queryKey = buildCacheKey(["eventPrediction", event.eid]);
         cacheData(queryKey, { event });
       });
     },
@@ -45,7 +55,7 @@ export const PicksLoader = ({ children, ...props }) => {
   // The EventPredictionLoader should subscribe to
   // 'predictions/picks/{eid}_{mtid}' // Three times, once per each market
   const fbResult = useFirebaseService([...keys, leagueId, date], {
-    path: '/predictions/eid_mtid', // NEED A CORRECT LIST FOR THE EID AND THE MTID
+    path: "/predictions/eid_mtid", // NEED A CORRECT LIST FOR THE EID AND THE MTID
     subscribe: false,
     limit: 5,
   });
@@ -56,7 +66,7 @@ export const PicksLoader = ({ children, ...props }) => {
 
   const events = oddsResult.data?.eventsByDateNew.events;
 
-  console.log(fbResult.data?.data, 'fbResult')
+  console.log(fbResult.data?.data, "fbResult");
 
   return children({ events });
 };

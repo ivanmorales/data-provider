@@ -7,11 +7,11 @@ export default ({
   lid,
   hoursRange,
   fastForward,
-  eventStatus,
+  eventStatuses,
   fastForwardOffset,
 }) => gql`
 {
-  eventsByDateNew(lid: ${lid}, startDate: ${date}, hoursRange: ${hoursRange}, mtid: ${mtid}, sort: {by: ["dt", "lid", "des"], order: ASC}, fastForwardOffset: ${fastForwardOffset}, fastForward: ${fastForward}, es: ${eventStatus}, showEmptyEvents: false, onlyRanked: false, paid: ${paid}) {
+  eventsByDateNew(lid: ${lid}, startDate: ${date}, hoursRange: ${hoursRange}, mtid: ${mtid}, sort: {by: ["dt", "lid", "des"], order: ASC}, fastForwardOffset: ${fastForwardOffset}, fastForward: ${fastForward}, es: ${eventStatuses}, showEmptyEvents: false, onlyRanked: false, paid: ${paid}) {
     events {
       eid
       des
@@ -84,10 +84,6 @@ export default ({
               idty
               entrid
             }
-            socialNetworks {
-              account
-              network
-            }
           }
           ... on ParticipantGroup {
             partgid
@@ -128,20 +124,6 @@ export default ({
         pn
         val
         sequence
-      }
-      statisticsByGroups(statisticGroup: ["otScoreboardBasketball", "odLeaguePage", "EventSeriesStats"]) {
-        eid
-        entrid
-        ent
-        grp
-        val
-        stat
-        idty
-        partid
-        sequence
-        pfn
-        pln
-        pid
       }
       marketTypes {
         mtid
