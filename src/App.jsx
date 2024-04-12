@@ -58,14 +58,42 @@ function App() {
                 <p style={{ textAlign: "left" }}>
                   {event.eid} - {marketId}
                 </p>
-                <pre style={{ textAlign: "left" }}>
-                  {JSON.stringify(event.marketPrediction, null, 2)}
-                </pre>
+                <EventLoader
+                  eventId={4710565}
+                  marketId={marketId}
+                  key={marketId}
+                >
+                  {({ event }) => (
+                    <>
+                      <h4>{event.eid}</h4>
+                      {/* {event.participatType === "player" && (
+                        <PlayerParticpantLoader playerId={event.participant.id}>
+                          {({ player }) => <h5>{player.name}</h5>}
+                        </PlayerParticpantLoader>
+                      )} */}
+                    </>
+                  )}
+                </EventLoader>
               </>
             )}
           </EventLoader>
         ))}
       </div>
+      <LeagueEventsLoader leagueId={5}>
+        {({ league }) => (
+          <>
+            {league.events?.map((event) => (
+              <EventLoader
+                eventId={event.eid}
+                market={selectedMarketId}
+                key={event.eid}
+              >
+                {({ event }) => <Prediction data={event.predictionData} />}
+              </EventLoader>
+            ))}
+          </>
+        )}
+      </LeagueEventsLoader>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
