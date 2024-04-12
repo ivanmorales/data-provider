@@ -29,12 +29,9 @@ export const useOddsService = (keys, { query, variables = {}, onSuccess }) => {
           if (newResult) return newResult;
         }
 
-        console.log(queryKey, "result");
-
         return result;
       } catch (err) {
-        console.log("testing");
-        // console.log(err, "err adcaca");
+        console.log("err");
       }
     },
     refetchOnWindowFocus: false,

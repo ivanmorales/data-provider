@@ -16,6 +16,7 @@ export const LeagueEventLoader = ({ children, ...props }) => {
     lid: leagueId,
     fastForward: true,
     paid: "[101,106,113,102,98,109,115,122,99]",
+    eventStatus: JSON.stringify(["scheduled", "delayed"]),
     date: 1712905200000,
     hoursRange: 24,
     fastForwardOffset: -7,

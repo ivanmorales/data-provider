@@ -10,6 +10,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import { compress, decompress } from "lz-string";
 import { EventLoader } from "./DataProvider/EventLoader";
 import { LeagueEventLoader } from "./DataProvider/LeagueEventLoader";
+import { EventPredictionLoader } from "./DataProvider/EventPredictionLoader";
 import { PicksLoader } from "./DataProvider/PicksLoader";
 
 const queryClient = new QueryClient({
@@ -83,8 +84,21 @@ function App() {
         ))} */}
       </div>
       {/* PICKS LOADER */}
-      <PicksLoader leagueId={5} mtid={[401, 83, 402]} date={1712905200000}>
-        {({ events }) => events.map(({eid}) => <div>{eid}</div>)}
+      <PicksLoader leagueId={5} mtid={[401, 83, 402]} date={1712041200000}>
+        {({ events }) =>
+          events.map(({ eid }) => {
+            return (
+              <EventPredictionLoader eventId={eid} marketId={1607} key={eid}>
+                {({ event: { eid, marketPrediction } }) => (
+                  <div>
+                    EVENT:{" "}
+                    <pre>{JSON.stringify({ eid, marketPrediction }, 0, 2)}</pre>
+                  </div>
+                )}
+              </EventPredictionLoader>
+            );
+          })
+        }
       </PicksLoader>
       {/* LEAGUE EVENT LOADER!!! */}
       {/* <LeagueEventLoader leagueId={5}>

@@ -1,16 +1,18 @@
+import { useEffect } from "react";
+
 import byEvent from "../queries/byEvent";
 
 import { useOddsService } from "./useOddsService";
 import { useFirebaseService } from "./useFirebaseService";
 
-export const EventLoader = ({ children, ...props }) => {
+export const EventPredictionLoader = ({ children, ...props }) => {
   if (typeof children !== "function") {
     console.error(`{children} must be passed as a function`);
     return;
   }
   const { eventId, marketId } = props;
 
-  const keys = ["event", eventId];
+  const keys = ["eventPrediction", eventId];
 
   const query = byEvent(eventId);
   const oddsResult = useOddsService(keys, {
@@ -32,8 +34,10 @@ export const EventLoader = ({ children, ...props }) => {
 
   const event = oddsResult.data?.event;
 
-  console.log(fbResult, 'fbResult')
-
   if (fbResult.isFetched) event.marketPrediction = fbResult.data?.data;
+
   return children({ event });
 };
+
+
+// BRB

@@ -1,16 +1,17 @@
 import { gql } from "graphql-request";
 
 export default ({
-  hoursRange,
+  mtid,
   date,
   paid,
   lid,
+  hoursRange,
   fastForward,
+  eventStatus,
   fastForwardOffset,
-  mtid,
 }) => gql`
 {
-  eventsByDateNew(lid: ${lid}, startDate: ${date}, hoursRange: ${hoursRange}, mtid: ${mtid}, sort: {by: ["dt", "lid", "des"], order: ASC}, fastForwardOffset: ${fastForwardOffset}, fastForward: ${fastForward}, es: ["scheduled", "delayed"], showEmptyEvents: false, onlyRanked: false, paid: ${paid}) {
+  eventsByDateNew(lid: ${lid}, startDate: ${date}, hoursRange: ${hoursRange}, mtid: ${mtid}, sort: {by: ["dt", "lid", "des"], order: ASC}, fastForwardOffset: ${fastForwardOffset}, fastForward: ${fastForward}, es: ${eventStatus}, showEmptyEvents: false, onlyRanked: false, paid: ${paid}) {
     events {
       eid
       des
