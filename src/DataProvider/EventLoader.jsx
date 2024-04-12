@@ -16,6 +16,9 @@ export const EventLoader = ({ children, ...props }) => {
   const oddsResult = useOddsService(keys, {
     query,
     variables: { eid: eventId },
+    onSuccess(data) {
+      event = data.eventsV2.events.find((event) => event.eid === eventId);
+    },
   });
 
   const fbResult = useFirebaseService([...keys, marketId], {
@@ -27,11 +30,8 @@ export const EventLoader = ({ children, ...props }) => {
     return <span>Loading ...</span>;
   }
 
-  // Data Formatting ... yuck
-  const event = oddsResult.data?.eventsV2.events.find(
-    (event) => event.eid === eventId
-  );
-  if (fbResult.isFetched) event.marketPrediction = fbResult.data?.data;
+  const event = oddsResult.data?.event;
 
+  if (fbResult.isFetched) event.marketPrediction = fbResult.data?.data;
   return children({ event });
 };

@@ -9,17 +9,19 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 
 import { compress, decompress } from "lz-string";
 import { EventLoader } from "./DataProvider/EventLoader";
+import { LeagueEventLoader } from "./DataProvider/LeagueEventLoader";
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { staleTime: 1000 * 60 } },
+  // defaultOptions: { queries: { staleTime: 1000 * 60 } },
+  defaultOptions: { queries: { staleTime: 1000 } },
 });
 
 persistQueryClient({
   queryClient: queryClient,
   persister: createSyncStoragePersister({
     storage: window.localStorage,
-    serialize: (data) => compress(JSON.stringify(data)),
-    deserialize: (data) => JSON.parse(decompress(data)),
+    // serialize: (data) => compress(JSON.stringify(data)),
+    // deserialize: (data) => JSON.parse(decompress(data)),
   }),
   maxAge: Infinity,
 });
@@ -51,7 +53,7 @@ function App() {
         >
           Fetch new market
         </button>
-        {markets.map((marketId) => (
+        {/* {markets.map((marketId) => (
           <EventLoader eventId={4710564} marketId={marketId} key={marketId}>
             {({ event }) => (
               <>
@@ -66,20 +68,32 @@ function App() {
                   {({ event }) => (
                     <>
                       <h4>{event.eid}</h4>
-                      {/* {event.participatType === "player" && (
+                      {event.participatType === "player" && (
                         <PlayerParticpantLoader playerId={event.participant.id}>
                           {({ player }) => <h5>{player.name}</h5>}
                         </PlayerParticpantLoader>
-                      )} */}
+                      )}
                     </>
                   )}
                 </EventLoader>
               </>
             )}
           </EventLoader>
-        ))}
+        ))} */}
       </div>
-      <LeagueEventsLoader leagueId={5}>
+      <LeagueEventLoader leagueId={5}>
+        {({ events }) =>
+          events.map(({ eid }) => {
+            return (
+              // <span key=>{eid}</span>
+              <EventLoader key={eid} eventId={eid}>
+                {({ event }) => <h4>{event.eid}</h4>}
+              </EventLoader>
+            );
+          })
+        }
+      </LeagueEventLoader>
+      {/* <LeagueEventsLoader leagueId={5}>
         {({ league }) => (
           <>
             {league.events?.map((event) => (
@@ -93,13 +107,13 @@ function App() {
             ))}
           </>
         )}
-      </LeagueEventsLoader>
+      </LeagueEventsLoader> */}
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
-      <EventLoader eventId={4710565}>
-        {({ event }) => <h4>{event.eid}</h4>}
-      </EventLoader>
+      {/* // <EventLoader eventId={4710565}>
+      //   {({ event }) => <h4>{event.eid}</h4>}
+      // </EventLoader> */}
     </DataProvider>
   );
 }
