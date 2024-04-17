@@ -5,13 +5,30 @@ import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 
 import { compress, decompress } from "lz-string";
-import { EventLoader } from "./DataProvider/EventLoader";
+// import { EventLoader } from "./DataProvider/EventLoader";
 import { LeagueEventLoader } from "./DataProvider/LeagueEventLoader";
 import { EventPredictionLoader } from "./DataProvider/EventPredictionLoader";
 import { LinePredictionLoader } from "./DataProvider/LinePredictionLoader";
 // import { PicksLoader } from "./DataProvider/PicksLoader";
 import { EventCard } from "./component/EventCard";
 import { Loading } from "./component/Loading";
+import { useLiveOddsSocket } from "./sockets/useWebSocket";
+
+const MOCK_SOCKET = {
+  maxSequences: {
+    currentLines: {
+      maxSequence: 11803685821,
+    },
+  },
+  subscriptionRequest: {
+    lines: ["4730952-1607", "4730952-1607", "4730952-401", "4730952-401"],
+    bestLines: ["10"],
+  },
+  key: "LeagueTableEvents - lid: 5 ⭐",
+  args: {
+    lid: 5,
+  },
+};
 
 const queryClient = new QueryClient({
   // defaultOptions: { queries: { staleTime: 1000 * 60 } },
@@ -22,19 +39,22 @@ persistQueryClient({
   queryClient: queryClient,
   persister: createSyncStoragePersister({
     storage: window.localStorage,
-    // serialize: (data) => compress(JSON.stringify(data)),
-    // deserialize: (data) => JSON.parse(decompress(data)),
+    serialize: (data) => compress(JSON.stringify(data)),
+    deserialize: (data) => JSON.parse(decompress(data)),
   }),
   maxAge: Infinity,
 });
 
-const picksMarkets = [401, 402];
+// const picksMarkets = [401, 402];
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 const LEAGUE = 5;
-const DATE = 1712041200000;
+// April 2, 2024
+// const DATE = 1712041200000;
+// April 17, 2024
+const DATE = 1713319200000;
 const EVENT_STATUSES = [
   "scheduled",
   "in-progress",
@@ -47,16 +67,24 @@ const EVENT_STATUSES = [
   "unknown",
 ];
 const MARKETS = [1607, 1608, 1609];
-const CATID = 10
+const CATID = 10;
 
 function App() {
+  useLiveOddsSocket({
+    onUpdate: (args) => {
+      console.log(args, "args - update");
+    },
+    onReconnect: (args) => {
+      console.log(args, "args - reconnect");
+    },
+    ...MOCK_SOCKET,
+  });
   return (
     <DataProvider client={queryClient}>
       <LeagueEventLoader
         leagueId={LEAGUE}
         date={DATE}
         eventStatuses={EVENT_STATUSES}
-        
         markets={MARKETS}
         catid={CATID}
       >
@@ -71,9 +99,16 @@ function App() {
                   key={market}
                 >
                   {({ event: { prediction } }) => (
-                    <LinePredictionLoader eventId={event.eid} catid={CATID} marketId={market} partid={prediction?.partid}>
+                    <LinePredictionLoader
+                      eventId={event.eid}
+                      catid={CATID}
+                      marketId={market}
+                      partid={prediction?.partid}
+                    >
                       {({ line }) => (
-                        <pre>{JSON.stringify({line, prediction}, null, 2)}</pre>
+                        <pre>
+                          {JSON.stringify({ line, prediction }, null, 2)}
+                        </pre>
                       )}
                     </LinePredictionLoader>
                   )}
