@@ -12,26 +12,7 @@ import { LinePredictionLoader } from "./DataProvider/LinePredictionLoader";
 // import { PicksLoader } from "./DataProvider/PicksLoader";
 import { EventCard } from "./component/EventCard";
 import { Loading } from "./component/Loading";
-import { useLiveOddsSocket } from "./sockets/useWebSocket";
-
-const MOCK_SOCKET = {
-  maxSequences: {
-    currentLines: {
-      maxSequence: 11804170498,
-    },
-  },
-  subscriptionRequest: {
-    statistics: [
-      "4730952-otScoreboardBasketball",
-    ],
-    lines: ["4730952-401", "4730953-401", "4731054-401"],
-    bestLines: ["10"],
-  },
-  key: "LeagueTableEvents - lid: 5 ⭐",
-  args: {
-    lid: 5,
-  },
-};
+import { WebSocketLoader } from "./DataProvider/WebSocketLoader";
 
 const queryClient = new QueryClient({
   // defaultOptions: { queries: { staleTime: 1000 * 60 } },
@@ -73,15 +54,6 @@ const MARKETS = [1607, 1608, 1609];
 const CATID = 10;
 
 function App() {
-  useLiveOddsSocket({
-    onUpdate: (args) => {
-      console.log(args, "args - update");
-    },
-    onReconnect: (args) => {
-      console.log(args, "args - reconnect");
-    },
-    ...MOCK_SOCKET,
-  });
   return (
     <DataProvider client={queryClient}>
       <LeagueEventLoader
@@ -91,8 +63,9 @@ function App() {
         markets={MARKETS}
         catid={CATID}
       >
-        {({ events }) =>
-          events.map((event) => (
+        {({ events }) => (
+          <WebSocketLoader events={events} markets={MARKETS} catid={CATID}>
+            {events.map((event) => (
             <EventCard event={event} key={event.eid}>
               {MARKETS.map((market) => (
                 <EventPredictionLoader
@@ -118,7 +91,9 @@ function App() {
                 </EventPredictionLoader>
               ))}
             </EventCard>
-          ))
+          ))}
+          </WebSocketLoader>
+        )
         }
       </LeagueEventLoader>
     </DataProvider>
