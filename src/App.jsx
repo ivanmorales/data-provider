@@ -1,6 +1,3 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
 import { QueryClient } from "@tanstack/react-query";
 import { DataProvider } from "./DataProvider";
@@ -11,6 +8,7 @@ import { compress, decompress } from "lz-string";
 import { EventLoader } from "./DataProvider/EventLoader";
 import { LeagueEventLoader } from "./DataProvider/LeagueEventLoader";
 import { EventPredictionLoader } from "./DataProvider/EventPredictionLoader";
+import { LinePredictionLoader } from "./DataProvider/LinePredictionLoader";
 // import { PicksLoader } from "./DataProvider/PicksLoader";
 import { EventCard } from "./component/EventCard";
 import { Loading } from "./component/Loading";
@@ -49,6 +47,7 @@ const EVENT_STATUSES = [
   "unknown",
 ];
 const MARKETS = [1607, 1608, 1609];
+const CATID = 10
 
 function App() {
   return (
@@ -65,11 +64,15 @@ function App() {
                 <EventPredictionLoader
                   eventId={event.eid}
                   marketId={market}
-                  key={market}
                   fallback={<Loading />}
+                  key={market}
                 >
                   {({ event: { prediction } }) => (
-                    <pre>{JSON.stringify(prediction, null, 2)}</pre>
+                    <LinePredictionLoader eventId={event.eid} catid={CATID} marketId={market} partid={prediction?.partid}>
+                      {({ line }) => (
+                        <pre>{JSON.stringify({line, prediction}, null, 2)}</pre>
+                      )}
+                    </LinePredictionLoader>
                   )}
                 </EventPredictionLoader>
               ))}
