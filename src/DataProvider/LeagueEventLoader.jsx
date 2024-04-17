@@ -3,6 +3,7 @@ import byLeague from "../queries/byLeague";
 import { buildKey, useOddsService } from "./useOddsService";
 import { useFirebaseService } from "./useFirebaseService";
 import { Loading } from "../component/Loading";
+import byLine from "../queries/byLine";
 
 export const LeagueEventLoader = ({
   children,
@@ -13,9 +14,10 @@ export const LeagueEventLoader = ({
     console.error(`{children} must be passed as a function`);
     return;
   }
-  const { leagueId, date, eventStatuses } = props;
+  const { leagueId, date, eventStatuses, markets, catid } = props;
 
   const keys = ["league", leagueId, date];
+  const keysByLine = ["linesByleague", leagueId, date];
 
   const query = byLeague({
     lid: leagueId,
@@ -46,7 +48,46 @@ export const LeagueEventLoader = ({
     },
   });
 
-  if (oddsResult.isLoading) {
+  const eids = oddsResult.data?.eventsByDateNew.events.map(({ eid }) => eid);
+
+  const queryByLine = byLine({
+    catid,
+    eventId: JSON.stringify(eids),
+    marketId: JSON.stringify(markets),
+  });
+  const oddsResultByLine = useOddsService(keysByLine, {
+    query: queryByLine,
+    variables: {
+      enabled: Boolean(eids && eids.length && markets && markets.length),
+    },
+    onSuccess(data, cacheData) {
+      if (!data.bestLines) return;
+
+      const groupedByEventAndMarket = data.bestLines.reduce((acc, line) => {
+        const { eid, mtid } = line || {};
+
+        if (!eid || !mtid) return acc;
+
+        const key = `${eid}-${mtid}`;
+
+        if (!acc[key]) acc[key] = [];
+
+        acc[key].push(line);
+
+        return acc;
+      }, {});
+
+      Object.keys(groupedByEventAndMarket).map((key) => {
+        const [eid, mtid] = key.split('-')
+        const queryKey = buildKey(["lineByEvent", `${catid}`, `${eid}`, `${mtid}`]);
+        cacheData(queryKey, { bestLines: groupedByEventAndMarket[key] });
+      })
+
+      return data.bestLines;
+    },
+  });
+
+  if (oddsResultByLine.isLoading || oddsResult.isLoading) {
     return fallback;
   }
 

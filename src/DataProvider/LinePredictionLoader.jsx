@@ -14,8 +14,7 @@ export const LinePredictionLoader = ({
   }
   const { eventId, marketId, catid, partid } = props;
 
-  const eventCacheKey = ["lineByEvent", catid, eventId, marketId];
-
+  const eventCacheKey = ["lineByEvent", `${catid}`, `${eventId}`, `${marketId}`];
   const query = byLine({ catid, eventId, marketId });
   const oddsResult = useOddsService(eventCacheKey, {
     query,

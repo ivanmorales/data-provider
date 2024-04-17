@@ -10,8 +10,9 @@ export const buildCacheKey = (key) => (keys) => [key, ...keys];
 
 export const useOddsService = (keys, { query, variables = {}, onSuccess }) => {
   const queryKey = buildKey(keys);
-  console.log("queryKey", queryKey);
+  // console.log("queryKey", queryKey);
   const queryClient = useQueryClient();
+  const { enabled = true } = variables
 
   const response = useQuery({
     queryKey,
@@ -37,6 +38,7 @@ export const useOddsService = (keys, { query, variables = {}, onSuccess }) => {
     },
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    enabled,
   });
 
   return response;

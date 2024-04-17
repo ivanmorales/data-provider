@@ -56,6 +56,9 @@ function App() {
         leagueId={LEAGUE}
         date={DATE}
         eventStatuses={EVENT_STATUSES}
+        
+        markets={MARKETS}
+        catid={CATID}
       >
         {({ events }) =>
           events.map((event) => (
