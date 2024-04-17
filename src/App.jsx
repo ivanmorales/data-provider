@@ -17,11 +17,14 @@ import { useLiveOddsSocket } from "./sockets/useWebSocket";
 const MOCK_SOCKET = {
   maxSequences: {
     currentLines: {
-      maxSequence: 11803685821,
+      maxSequence: 11804170498,
     },
   },
   subscriptionRequest: {
-    lines: ["4730952-1607", "4730952-1607", "4730952-401", "4730952-401"],
+    statistics: [
+      "4730952-otScoreboardBasketball",
+    ],
+    lines: ["4730952-401", "4730953-401", "4731054-401"],
     bestLines: ["10"],
   },
   key: "LeagueTableEvents - lid: 5 ⭐",
