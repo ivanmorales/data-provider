@@ -4,6 +4,7 @@ import { DataProvider } from "./DataProvider";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 
+import React from 'react'
 import { compress, decompress } from "lz-string";
 // import { EventLoader } from "./DataProvider/EventLoader";
 import { LeagueEventLoader } from "./DataProvider/LeagueEventLoader";
@@ -37,8 +38,8 @@ persistQueryClient({
 const LEAGUE = 5;
 // April 2, 2024
 // const DATE = 1712041200000;
-// April 17, 2024
-const DATE = 1713319200000;
+// April 18, 2024
+const DATE = 1713423600000;
 const EVENT_STATUSES = [
   "scheduled",
   "in-progress",
@@ -50,8 +51,18 @@ const EVENT_STATUSES = [
   "canceled",
   "unknown",
 ];
-const MARKETS = [1607, 1608, 1609];
+const MARKETS = [401, 402, 83];
 const CATID = 10;
+
+
+const Line = React.memo(({ oddsV2BestLine, socketBestLine = {}, prediction }) => {
+  console.log('RENDER', `${socketBestLine.eid}-${socketBestLine.mtid}`)
+  return (
+    <pre style={{ textAlign: "left" }}>
+      {JSON.stringify({ oddsV2BestLine, socketBestLine, prediction }, 0, 2)}
+    </pre>
+  );
+});
 
 function App() {
   return (
@@ -66,35 +77,36 @@ function App() {
         {({ events }) => (
           <WebSocketLoader events={events} markets={MARKETS} catid={CATID}>
             {events.map((event) => (
-            <EventCard event={event} key={event.eid}>
-              {MARKETS.map((market) => (
-                <EventPredictionLoader
-                  eventId={event.eid}
-                  marketId={market}
-                  fallback={<Loading />}
-                  key={market}
-                >
-                  {({ event: { prediction } }) => (
-                    <LinePredictionLoader
-                      eventId={event.eid}
-                      catid={CATID}
-                      marketId={market}
-                      partid={prediction?.partid}
-                    >
-                      {({ line }) => (
-                        <pre>
-                          {JSON.stringify({ line, prediction }, null, 2)}
-                        </pre>
-                      )}
-                    </LinePredictionLoader>
-                  )}
-                </EventPredictionLoader>
-              ))}
-            </EventCard>
-          ))}
+              <EventCard event={event} key={event.eid}>
+                {MARKETS.map((market) => (
+                  <EventPredictionLoader
+                    eventId={event.eid}
+                    marketId={market}
+                    fallback={<Loading />}
+                    key={market}
+                  >
+                    {({ event: { prediction } }) => (
+                      <LinePredictionLoader
+                        eventId={event.eid}
+                        catid={CATID}
+                        marketId={market}
+                        partid={prediction?.partid}
+                      >
+                        {({ oddsV2BestLine, socketBestLine }) => (
+                          <Line
+                            oddsV2BestLine={oddsV2BestLine}
+                            socketBestLine={socketBestLine}
+                            prediction={prediction}
+                          />
+                        )}
+                      </LinePredictionLoader>
+                    )}
+                  </EventPredictionLoader>
+                ))}
+              </EventCard>
+            ))}
           </WebSocketLoader>
-        )
-        }
+        )}
       </LeagueEventLoader>
     </DataProvider>
   );
